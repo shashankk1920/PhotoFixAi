@@ -102,8 +102,7 @@ export function NewProjectModal({ isOpen, onClose }) {
         height: uploadData.height || 600,
         canvasState: null,
       });
-
-      toast.success("Project created successfully!");
+    toast.success(`Project created successfully! ID: ${projectId}`);
 
       // Navigate to editor
       router.push(`/editor/${projectId}`);

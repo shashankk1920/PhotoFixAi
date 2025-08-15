@@ -36,7 +36,7 @@ export const create = mutation({
     // Check plan limits for free users
     if (user.plan === "free") {
       const projectCount = await ctx.db
-        .query("projects")
+        .query("projectUse")
         .withIndex("by_user", (q) => q.eq("userId", user._id))
         .collect();
 
@@ -48,7 +48,7 @@ export const create = mutation({
     }
 
     // Create the project
-    const projectId = await ctx.db.insert("projects", {
+  const projectId = await ctx.db.insert("projectUse", {
       title: args.title,
       userId: user._id,
       originalImageUrl: args.originalImageUrl,
@@ -73,7 +73,7 @@ export const create = mutation({
 
 // Delete a project
 export const deleteProject = mutation({
-  args: { projectId: v.id("projects") },
+  args: { projectId: v.id("projectUse") },
   handler: async (ctx, args) => {
     const user = await ctx.runQuery(internal.users.getCurrentUser);
 
@@ -101,7 +101,7 @@ export const deleteProject = mutation({
 
 // Get a single project by ID
 export const getProject = query({
-  args: { projectId: v.id("projects") },
+  args: { projectId: v.id("projectUse") },
   handler: async (ctx, args) => {
     const user = await ctx.runQuery(internal.users.getCurrentUser);
 
@@ -121,7 +121,7 @@ export const getProject = query({
 // Update project canvas state and metadata
 export const updateProject = mutation({
   args: {
-    projectId: v.id("projects"),
+    projectId: v.id("projectUse"),
     canvasState: v.optional(v.any()),
     width: v.optional(v.number()), // ← Add this
     height: v.optional(v.number()), // ← Add this

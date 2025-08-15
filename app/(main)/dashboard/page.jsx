@@ -8,9 +8,10 @@ import { Plus, Sparkles } from "lucide-react";
 
 import Image from "next/image";
 import { NewProjectModal } from "./_components/new-project-modal";
+import { ProjectGrid } from "./_components/ProjectGrid";
 
 const Dashboard = () => {
-  const { data: projects, isLoading, error } = useConvexQuery(api.projects.getProjects);
+  const { data: projects, isLoading, error } = useConvexQuery(api.projects.getProject);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
 
   if (error) {
