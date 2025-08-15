@@ -3,11 +3,12 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 
 // Get all projects for the current user
-export const getUserProjects = query({
+export const getProjects = query({
   handler: async (ctx) => {
     const user = await ctx.runQuery(internal.users.getCurrentUser);
 
     // Get user's projects, ordered by most recently updated
+
     const projects = await ctx.db
       .query("projectUse")
       .withIndex("by_user_Updated", (q) => q.eq("userId", user._id))
