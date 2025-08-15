@@ -11,7 +11,7 @@ import { NewProjectModal } from "./_components/new-project-modal";
 import { ProjectGrid } from "./_components/ProjectGrid";
 
 const Dashboard = () => {
-  const { data: projects, isLoading, error } = useConvexQuery(api.projects.getProject);
+  const { data: projects, isLoading, error } = useConvexQuery(api.projects.getProjects);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
 
   if (error) {
