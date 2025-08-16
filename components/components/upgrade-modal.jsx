@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PricingTable } from "@clerk/nextjs";
 
 export function UpgradeModal({ isOpen, onClose, restrictedTool, reason }) {
+  console.log('UpgradeModal rendered, isOpen:', isOpen);
   const getToolName = (toolId) => {
     const toolNames = {
       background: "AI Background Tools",
@@ -30,8 +31,7 @@ export function UpgradeModal({ isOpen, onClose, restrictedTool, reason }) {
           <div className="flex items-center gap-3">
             <Crown className="h-6 w-6 text-yellow-500" />
             <DialogTitle className="text-2xl font-bold text-white">
-              Upgrade to Pro
-            </DialogTitle>
+              Upgrade to             </DialogTitle>
           </div>
         </DialogHeader>
 

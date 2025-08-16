@@ -34,6 +34,7 @@ export function usePlanAccess() {
 
   // Check if user has reached project limits
   const canCreateProject = (currentProjectCount) => {
+    console.log('usePlanAccess:', { isPro, isFree, currentProjectCount });
     if (isPro) return true;
     return currentProjectCount < 3; // Free limit
   };

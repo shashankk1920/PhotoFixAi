@@ -1,3 +1,16 @@
+// Public function to get projects for the current user
+export const getUserProjects = query({
+  handler: async (ctx) => {
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
+    if (!user) throw new Error("User not found");
+    const projects = await ctx.db
+      .query("projectUse")
+      .withIndex("by_user_Updated", (q) => q.eq("userId", user._id))
+      .order("desc")
+      .collect();
+    return projects;
+  },
+});
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
@@ -63,7 +76,7 @@ export const create = mutation({
 
     // Update user's project count
     await ctx.db.patch(user._id, {
-      projectsUsed: user.projectsUsed + 1,
+      projectUsed: user.projectUsed + 1,
       lastActiveAt: Date.now(),
     });
 
@@ -91,7 +104,7 @@ export const deleteProject = mutation({
 
     // Update user's project count
     await ctx.db.patch(user._id, {
-      projectsUsed: Math.max(0, user.projectsUsed - 1),
+      projectUsed: Math.max(0, user.projectUsed - 1),
       lastActiveAt: Date.now(),
     });
 

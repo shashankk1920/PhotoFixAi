@@ -17,7 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { useDropzone } from "react-dropzone";
 import { useConvexMutation, useConvexQuery } from "@/hooks/use-convex-query";
 import { usePlanAccess } from "@/hooks/use-plan-access";
-import { UpgradeModal } from "@/components/upgrade-model";
+import { UpgradeModal } from "@/components/components/upgrade-modal";
+import AttemptsLimit from "@/components/AttemptsLimit";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -28,9 +29,11 @@ export function NewProjectModal({ isOpen, onClose }) {
   const [projectTitle, setProjectTitle] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  console.log('NewProjectModal rendered, showUpgradeModal:', showUpgradeModal);
+  // Removed duplicate state declarations
 
   const { mutate: createProject } = useConvexMutation(api.projects.create);
-  const { data: projects } = useConvexQuery(api.projects.getProjects);
+  const { data: projects } = useConvexQuery(api.projects.getUserProjects);
   const { canCreateProject, isFree } = usePlanAccess();
   const router = useRouter();
 
@@ -57,7 +60,7 @@ export function NewProjectModal({ isOpen, onClose }) {
       "image/*": [".png", ".jpg", ".jpeg", ".webp", ".gif"],
     },
     maxFiles: 1,
-    maxSize: 70 * 1024 * 1024, // 70MB limit
+    maxSize: 20 * 1024 * 1024, // 20MB limit
   });
 
   // Handle create project with plan limit check
@@ -102,12 +105,13 @@ export function NewProjectModal({ isOpen, onClose }) {
         height: uploadData.height || 600,
         canvasState: null,
       });
-    toast.success(`Project created successfully! ID: ${projectId}`);
+
+      toast.success("Project created successfully!");
 
       // Navigate to editor
       router.push(`/editor/${projectId}`);
     } catch (error) {
-      console.error("Error creating pr.oject:", error);
+      console.error("Error creating project:", error);
       toast.error(
         error.message || "Failed to create project. Please try again."
       );
@@ -128,7 +132,7 @@ export function NewProjectModal({ isOpen, onClose }) {
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleClose}>
-        <DialogContent className="max-w-2xl bg-slate-800 border-white/10">
+        <DialogContent className="max-w-2xl backdrop-blur-xl bg-gradient-to-br from-slate-800/80 to-cyan-900/80 border-white/10 transition-all duration-500 rounded-2xl shadow-2xl">
           <DialogHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -159,22 +163,47 @@ export function NewProjectModal({ isOpen, onClose }) {
                       : "Project Limit Reached"}
                   </div>
                   {currentProjectCount === 2
-                    ? "This will be your last free project. Upgrade to PhotoFixAI Pro for unlimited creativity and advanced AI features."
-                    : "Free plan is limited to 3 projects. Upgrade to PhotoFixAI Pro for unlimited projects and full access to all AI editing tools."}
+                    ? "This will be your last free project. Upgrade to Pixxel Pro for unlimited projects."
+                    : "Free plan is limited to 3 projects. Upgrade to Pixxel Pro to create more projects."}
                 </AlertDescription>
               </Alert>
             )}
 
-            {/* File Upload Area */}
-            {!selectedFile ? (
+            {/* AttemptsLimit Button for 3 attempts */}
+            {isFree && currentProjectCount >= 3 && (
+              <AttemptsLimit
+                attempts={currentProjectCount}
+                onUpgrade={() => {
+                  console.log('setShowUpgradeModal(true) called');
+                  setShowUpgradeModal(true);
+                }}
+              />
+            )}
+
+            {/* File Upload Area - disabled if limit reached */}
+            {isFree && currentProjectCount >= 3 ? (
+              <div className="border-2 border-dashed rounded-xl p-12 text-center opacity-50 pointer-events-none">
+                <Upload className="h-12 w-12 text-white/50 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">
+                  Upload an Image
+                </h3>
+                <p className="text-white/70 mb-4">
+                  Upgrade to Pro to create more projects
+                </p>
+                <p className="text-sm text-white/50">
+                  Supports PNG, JPG, WEBP up to 20MB
+                </p>
+              </div>
+            ) : !selectedFile ? (
               <div
                 {...getRootProps()}
-                className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all ${
+                className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-300 ${
                   isDragActive
-                    ? "border-cyan-400 bg-cyan-400/5"
+                    ? "border-cyan-400 bg-cyan-400/10 animate-pulse"
                     : "border-white/20 hover:border-white/40"
                 } ${!canCreate ? "opacity-50 pointer-events-none" : ""}`}
               >
+                  <Upload className={`h-12 w-12 mx-auto mb-4 transition-all duration-300 ${isDragActive ? "text-cyan-400 scale-110" : "text-white/50"}`} />
                 <input {...getInputProps()} />
                 <Upload className="h-12 w-12 text-white/50 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-2">
@@ -186,7 +215,7 @@ export function NewProjectModal({ isOpen, onClose }) {
                     : "Upgrade to Pro to create more projects"}
                 </p>
                 <p className="text-sm text-white/50">
-                  Supports PNG, JPG, WEBP up to 80MB
+                  Supports PNG, JPG, WEBP up to 20MB
                 </p>
               </div>
             ) : (
@@ -196,7 +225,7 @@ export function NewProjectModal({ isOpen, onClose }) {
                   <img
                     src={previewUrl}
                     alt="Preview"
-                    className="w-full h-64 object-cover rounded-xl border border-white/10"
+                    className="w-full h-64 object-cover rounded-xl border border-white/10 shadow-2xl transition-transform duration-300 hover:scale-105 hover:rotate-1"
                   />
                   <Button
                     variant="ghost"
@@ -206,7 +235,7 @@ export function NewProjectModal({ isOpen, onClose }) {
                       setPreviewUrl(null);
                       setProjectTitle("");
                     }}
-                    className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white"
+                    className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white shadow-lg transition-transform duration-300 hover:scale-110 hover:rotate-6"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -214,22 +243,17 @@ export function NewProjectModal({ isOpen, onClose }) {
 
                 {/* Project Title Input */}
                 <div className="space-y-2">
-                  <Label htmlFor="project-title" className="text-white text-lg font-semibold">
-                    Name Your AI Project
+                  <Label htmlFor="project-title" className="text-white">
+                    Project Title
                   </Label>
                   <Input
                     id="project-title"
                     type="text"
                     value={projectTitle}
                     onChange={(e) => setProjectTitle(e.target.value)}
-                    placeholder="E.g. 'Dreamy Landscape', 'AI Portrait', 'Product Mockup'"
-                    className="bg-gradient-to-r from-blue-900 to-purple-900 border-cyan-400 text-white placeholder-white/60 focus:border-cyan-400 focus:ring-cyan-400 shadow-lg"
-                    maxLength={50}
-                    autoFocus
+                    placeholder="Enter project name..."
+                    className="bg-slate-700 border-white/20 text-white placeholder-white/50 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 transition-all duration-300"
                   />
-                  <p className="text-xs text-white/50">
-                    Give your project a creative name. This helps organize your AI designs!
-                  </p>
                 </div>
 
                 {/* File Details */}
@@ -255,25 +279,29 @@ export function NewProjectModal({ isOpen, onClose }) {
               variant="ghost"
               onClick={handleClose}
               disabled={isUploading}
-              className="text-white/70 hover:text-white"
+              className="text-white/70 hover:text-white shadow-lg transition-transform duration-300 hover:scale-105 hover:rotate-1"
             >
               Cancel
             </Button>
 
-            <Button
-              onClick={handleCreateProject}
-              disabled={!selectedFile || !projectTitle.trim() || isUploading}
-              variant="primary"
-            >
-              {isUploading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                "Create Project"
-              )}
-            </Button>
+            {/* Only show Create Project button if limit not reached */}
+            {!(isFree && currentProjectCount >= 3) && (
+              <Button
+                onClick={handleCreateProject}
+                disabled={!selectedFile || !projectTitle.trim() || isUploading}
+                variant="primary"
+                className="shadow-lg transition-transform duration-300 hover:scale-105 hover:rotate-1"
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Project"
+                )}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -283,7 +311,7 @@ export function NewProjectModal({ isOpen, onClose }) {
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
         restrictedTool="projects"
-  reason="Free plan is limited to 3 projects. Upgrade to PhotoFixAI Pro for unlimited projects and full access to all advanced AI editing tools."
+        reason="Free plan is limited to 3 projects. Upgrade to Pro for unlimited projects and access to all AI editing tools."
       />
     </>
   );

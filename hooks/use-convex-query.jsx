@@ -48,12 +48,15 @@ export const useConvexMutation = (mutation) =>{
 const mutate = async (...args) => {
     setIsLoading(true);
     setError(null);
-    try{
+    try {
         const response = await mutationFn(...args);
-    }catch(err){
+        setData(response);
+        return response;
+    } catch (err) {
         setError(err);
         toast.error("An error occurred while mutating data ");
-    }finally{
+        return undefined;
+    } finally {
         setIsLoading(false);
     }
 };
