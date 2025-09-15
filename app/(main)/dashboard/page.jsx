@@ -5,7 +5,7 @@ import { Plus, Image, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useConvexQuery } from "@/hooks/use-convex-query";
 import { api } from "@/convex/_generated/api";
-import { NewProjectModal } from "./_components/app/(main)/dashboard/_components/new-project-modal";
+import NewProjectModal from "./_components/app/(main)/dashboard/_components/new-project-modal";
 import { ProjectGrid } from "./_components/app/(main)/dashboard/_components/project-grid";
 
 export default function DashboardPage() {

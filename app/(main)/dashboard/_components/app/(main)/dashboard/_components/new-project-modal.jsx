@@ -23,7 +23,7 @@ import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-export function NewProjectModal({ isOpen, onClose }) {
+function NewProjectModal({ isOpen, onClose }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [projectTitle, setProjectTitle] = useState("");
@@ -204,8 +204,7 @@ export function NewProjectModal({ isOpen, onClose }) {
                 } ${!canCreate ? "opacity-50 pointer-events-none" : ""}`}
               >
                   <Upload className={`h-12 w-12 mx-auto mb-4 transition-all duration-300 ${isDragActive ? "text-cyan-400 scale-110" : "text-white/50"}`} />
-                <input {...getInputProps()} />
-                <Upload className="h-12 w-12 text-white/50 mx-auto mb-4" />
+                  <input {...getInputProps()} />
                 <h3 className="text-xl font-semibold text-white mb-2">
                   {isDragActive ? "Drop your image here" : "Upload an Image"}
                 </h3>
@@ -316,3 +315,5 @@ export function NewProjectModal({ isOpen, onClose }) {
     </>
   );
 }
+
+export default NewProjectModal;
